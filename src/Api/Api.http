@@ -1,0 +1,13 @@
+@Api_HostAddress = http://localhost:5135
+
+### Health check
+GET {{Api_HostAddress}}/health
+
+### Summarize document
+POST {{Api_HostAddress}}/api/summarize
+Content-Type: application/json
+
+{
+  "text": "This is a long document that needs to be summarized. It contains multiple sentences and paragraphs of information that should be condensed into a brief summary."
+}
+###
