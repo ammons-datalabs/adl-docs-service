@@ -1,12 +1,17 @@
 using Ammons.DataLabs.DocsService.Endpoints;
 using Ammons.DataLabs.DocsService.Services;
+using Ammons.DataLabs.DocsService.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure Azure OpenAI options
+builder.Services.Configure<AzureOpenAiOptions>(builder.Configuration.GetSection(AzureOpenAiOptions.SectionName));
+
 // Register services
+builder.Services.AddScoped<IAzureOpenAiClient, AzureOpenAiClient>();
 builder.Services.AddScoped<IDocumentSummaryService, DocumentSummaryService>();
 
 var app = builder.Build();
@@ -17,7 +22,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.MapGet("/health", () => Results.Text("OK"))
     .WithName("Health")
