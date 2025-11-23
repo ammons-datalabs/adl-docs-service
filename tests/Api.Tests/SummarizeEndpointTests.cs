@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Ammons.DataLabs.DocsService.Models;
 using Ammons.DataLabs.DocsService.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -61,7 +62,84 @@ public class SummarizeEndpointTests : IClassFixture<WebApplicationFactory<Progra
         var content = await response.Content.ReadAsStringAsync();
         Assert.Equal("OK", content);
     }
-    
+
+    [Fact]
+    public async Task Summarize_Returns400_WithEmptyDocument()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = new { Text = "" };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/summarize", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Contains("empty", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+
+    [Fact]
+    public async Task Summarize_Returns400_WithOnlyWhitespaceDocument()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = new { Text = "                       " };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/summarize", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Contains("empty", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task TextEqual16kChars_ReturnsSuccess()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = new { Text = new string('a', 16384) };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/summarize", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var summary = await response.Content.ReadAsStringAsync();
+        Assert.NotEmpty(summary);
+    }
+
+
+    [Fact]
+    public async Task TextExceeding16kChars_Returns400()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = new { Text = new string('a', 16384 + 1) };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/summarize", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Contains("too long", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+
     // Fake implementation for testing
     private class FakeDocumentSummaryService: IDocumentSummaryService
     {
