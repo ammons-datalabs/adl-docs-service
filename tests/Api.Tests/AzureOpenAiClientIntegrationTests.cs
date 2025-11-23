@@ -2,12 +2,30 @@ using Ammons.DataLabs.DocsService.Configuration;
 using Ammons.DataLabs.DocsService.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Xunit.Sdk;
+using Xunit.Abstractions;
 
 namespace Api.Tests;
 
-public class AzureOpenAiClientIntegrationTests
+public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
 {
+    [Fact]
+    public void Debug_Configuration()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddUserSecrets<AzureOpenAiClientIntegrationTests>()
+            .Build();
+
+        var endpoint = configuration["AzureOpenAi:Endpoint"];
+        var apiKey = configuration["AzureOpenAi:ApiKey"];
+        var deploymentName = configuration["AzureOpenAi:DeploymentName"];
+        
+        output.WriteLine($"Endpoint: {endpoint}");
+        output.WriteLine($"ApiKey: {(string.IsNullOrEmpty(apiKey) ? "NOT Set": "SET")}");
+        output.WriteLine($"DeploymentName: {deploymentName}");
+
+        Assert.NotNull(endpoint);
+    }
+    
     [Fact]
     public async Task GetChatCompletionAsync_WithValidPrompt_ReturnsResponse()
     {
@@ -34,7 +52,7 @@ public class AzureOpenAiClientIntegrationTests
         // Act
         var result = await client.GetChatCompletionAsync("Say hello");
         
-        Assert.NotEmpty(result);
-        Assert.Contains("hello", result, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("Hello! How can I assist you today?", result.Summary);
+        Assert.Equal("gpt-4o-mini", result.Model);
     }
 }

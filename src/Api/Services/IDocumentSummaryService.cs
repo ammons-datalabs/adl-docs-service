@@ -1,6 +1,12 @@
+using Ammons.DataLabs.DocsService.Models;
+
 namespace Ammons.DataLabs.DocsService.Services;
 
 public interface IDocumentSummaryService
 {
-    Task<string> SummarizeAsync(string text);
+    Task<SummarizeResponse> SummarizeAsync(
+        string text,
+        SummaryStyle style,
+        string? title = null,
+        CancellationToken cancellationToken = default);
 }

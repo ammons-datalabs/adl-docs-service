@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Ammons.DataLabs.DocsService.Models;
 using Ammons.DataLabs.DocsService.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,9 +65,19 @@ public class SummarizeEndpointTests : IClassFixture<WebApplicationFactory<Progra
     // Fake implementation for testing
     private class FakeDocumentSummaryService: IDocumentSummaryService
     {
-        public Task<string> SummarizeAsync(string text)
+        public Task<SummarizeResponse> SummarizeAsync(
+            string text,
+            SummaryStyle style,
+            string? title = null,
+            CancellationToken cancellationToken = default)
         {
-            return Task.FromResult($"Fake summary of {text.Length} characters");
+            return Task.FromResult(new SummarizeResponse(
+                Summary: $"Fake summary of {text.Length} characters",
+                OriginalLength: text.Length,
+                Model: "fake-model",
+                GeneratedAt: DateTimeOffset.UtcNow,
+                Style: style
+                ));
         }
     }
 }

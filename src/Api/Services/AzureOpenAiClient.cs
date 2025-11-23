@@ -10,7 +10,7 @@ public sealed class AzureOpenAiClient(IOptions<AzureOpenAiOptions> options) : IA
 {
     private readonly AzureOpenAiOptions _options = options.Value;
 
-    public async Task<string> GetChatCompletionAsync(string prompt, CancellationToken cancellationToken = default)
+    public async Task<ChatCompletionResult> GetChatCompletionAsync(string prompt, CancellationToken cancellationToken = default)
     {
         var client = new AzureOpenAIClient(
             new Uri(_options.Endpoint),
@@ -26,6 +26,8 @@ public sealed class AzureOpenAiClient(IOptions<AzureOpenAiOptions> options) : IA
 
         var response = await chatClient.CompleteChatAsync(messages, cancellationToken: cancellationToken);
 
-        return response.Value.Content[0].Text;
+        return new ChatCompletionResult(
+            Summary: response.Value.Content[0].Text,
+            Model: _options.DeploymentName);
     }
 }

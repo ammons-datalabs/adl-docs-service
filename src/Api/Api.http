@@ -3,11 +3,40 @@
 ### Health check
 GET {{Api_HostAddress}}/health
 
-### Summarize document
+### Summarize document - Executive style (default)
 POST {{Api_HostAddress}}/api/summarize
 Content-Type: application/json
 
 {
-  "text": "This is a long document that needs to be summarized. It contains multiple sentences and paragraphs of information that should be condensed into a brief summary."
+  "text": "This is a long document that needs to be summarized. It contains multiple sentences and paragraphs of information that should be condensed into a brief summary. The document discusses various topics including business strategy, financial performance, and operational challenges.",
+  "title": "Q4 Business Review"      
+}
+
+### Summarize document - Risks style
+POST {{Api_HostAddress}}/api/summarize
+Content-Type: application/json
+
+{
+  "text": "The project is currently behind schedule due to resource constraints. Budget overruns have been identified in three key areas. Technical debt is accumulating in the legacy systems. Vendor dependencies pose potential delivery risks.",
+  "title": "Project Status Report",
+  "style": "Risks"
+}
+
+### Summarize document - Actions style
+POST {{Api_HostAddress}}/api/summarize
+Content-Type: application/json
+
+{
+  "text": "Meeting notes: Team agreed to refactor the authentication module by end of Q1. John will coordinate with the security team. Sarah needs to update the API documentation. We must  schedule a review meeting next week.",
+  "style": "Actions"
+}
+
+### Summarize document - Technical style
+POST {{Api_HostAddress}}/api/summarize
+Content-Type: application/json
+
+{
+  "text": "The system uses a microservices architecture with event-driven communication via message queues. Authentication is handled through OAuth2 with JWT tokens. Data persistence layer implements repository pattern with Entity Framework Core",
+  "style": "Technical"
 }
 ###
