@@ -9,7 +9,7 @@ namespace Api.Tests;
 
 public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
 {
-    [Fact]
+    [Fact(Skip = "Manual verification only - requires user secrets")]
     public void Debug_Configuration()
     {
         var configuration = new ConfigurationBuilder()
@@ -27,7 +27,7 @@ public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
         Assert.NotNull(endpoint);
     }
     
-    [Fact]
+    [Fact(Skip = "Integration test requiring live Azure OpenAI with configured secrets")]
     public async Task GetChatCompletionAsync_WithValidPrompt_ReturnsResponse()
     {
         // Arrange - load configuration from user secrets
@@ -53,7 +53,8 @@ public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
         // Act
         var result = await client.GetChatCompletionAsync("Say hello");
         
-        Assert.Equal("Hello! How can I assist you today?", result.Summary);
-        Assert.Equal("gpt-4o-mini", result.Model);
+        Assert.False(string.IsNullOrWhiteSpace(result.Summary));
+        Assert.Contains("hello", result.Summary, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(result.Model);
     }
 }

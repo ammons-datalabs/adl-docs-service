@@ -13,7 +13,9 @@ public sealed class DocumentSummaryService(IAzureOpenAiClient openAiClient, ILog
     {
         var prompt = BuildPrompt(text, style, title);
         var result = await openAiClient.GetChatCompletionAsync(prompt, cancellationToken);
-        logger.Log(LogLevel.Information, "summarized document");
+        logger.Log(LogLevel.Information, 
+            "Summarized document with {Style}, original length {OriginalLength}, summary length {SummaryLength}",
+            style, text.Length, result.Summary.Length);
 
         return new SummarizeResponse(
             Summary: result.Summary,

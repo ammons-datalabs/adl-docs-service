@@ -16,7 +16,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 // Configure Azure OpenAI options
-builder.Services.Configure<AzureOpenAiOptions>(builder.Configuration.GetSection(AzureOpenAiOptions.SectionName));
+builder.Services
+    .AddOptions<AzureOpenAiOptions>()
+    .Bind(builder.Configuration.GetSection(AzureOpenAiOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 // Register services
 builder.Services.AddScoped<IAzureOpenAiClient, AzureOpenAiClient>();

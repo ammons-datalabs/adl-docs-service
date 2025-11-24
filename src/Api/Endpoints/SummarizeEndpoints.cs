@@ -5,6 +5,7 @@ namespace Ammons.DataLabs.DocsService.Endpoints;
 
 public static class SummarizeEndpoints
 {
+    private const int MaxTextLength = 16_384; // 16k chars, reasonable max length of document
     public static void MapSummarizeEndpoints(this WebApplication app)
     {
         app.MapPost("/api/summarize", async (
@@ -21,11 +22,11 @@ public static class SummarizeEndpoints
                     );
                 }
 
-                if (request.Text.Length > 16384)
+                if (request.Text.Length > MaxTextLength)
                 {
                     return Results.Problem(
                         title: "Request too long",
-                        detail: "Text too long, cannot be > 16k characters long",
+                        detail: $"Text too long, cannot be > {MaxTextLength:N0} characters long",
                         statusCode: StatusCodes.Status400BadRequest
                     );
                 }
