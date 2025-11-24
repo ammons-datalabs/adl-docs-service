@@ -1,6 +1,7 @@
 using Ammons.DataLabs.DocsService.Configuration;
 using Ammons.DataLabs.DocsService.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 
@@ -47,7 +48,7 @@ public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
         }
         
         var options = Options.Create(configValues);
-        var client = new AzureOpenAiClient(options);
+        var client = new AzureOpenAiClient(options, NullLogger<AzureOpenAiClient>.Instance);
         
         // Act
         var result = await client.GetChatCompletionAsync("Say hello");

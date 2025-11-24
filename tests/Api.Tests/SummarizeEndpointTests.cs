@@ -79,7 +79,7 @@ public class SummarizeEndpointTests : IClassFixture<WebApplicationFactory<Progra
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal(400, problem.Status);
-        Assert.Contains("empty", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("empty", problem.Detail, StringComparison.OrdinalIgnoreCase);
     }
 
 
@@ -99,7 +99,7 @@ public class SummarizeEndpointTests : IClassFixture<WebApplicationFactory<Progra
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal(400, problem.Status);
-        Assert.Contains("empty", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("empty", problem.Detail, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class SummarizeEndpointTests : IClassFixture<WebApplicationFactory<Progra
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal(400, problem.Status);
-        Assert.Contains("too long", problem!.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("too long", problem.Detail, StringComparison.OrdinalIgnoreCase);
     }
 
 

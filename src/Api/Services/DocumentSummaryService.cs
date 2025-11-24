@@ -2,7 +2,8 @@ using Ammons.DataLabs.DocsService.Models;
 
 namespace Ammons.DataLabs.DocsService.Services;
 
-public sealed class DocumentSummaryService(IAzureOpenAiClient openAiClient) : IDocumentSummaryService
+public sealed class DocumentSummaryService(IAzureOpenAiClient openAiClient, ILogger<DocumentSummaryService> logger)
+    : IDocumentSummaryService
 {
     public async Task<SummarizeResponse> SummarizeAsync(
         string text,
@@ -12,6 +13,7 @@ public sealed class DocumentSummaryService(IAzureOpenAiClient openAiClient) : ID
     {
         var prompt = BuildPrompt(text, style, title);
         var result = await openAiClient.GetChatCompletionAsync(prompt, cancellationToken);
+        logger.Log(LogLevel.Information, "summarized document");
 
         return new SummarizeResponse(
             Summary: result.Summary,

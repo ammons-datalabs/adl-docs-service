@@ -1,6 +1,7 @@
 using Ammons.DataLabs.DocsService.Models;
 using Ammons.DataLabs.DocsService.Services;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
 namespace Api.Tests;
@@ -20,7 +21,7 @@ public class DocumentSummaryServiceTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateTestResult("Executive summary from AI"));
 
-        var service = new DocumentSummaryService(mockClient.Object);
+        var service = new DocumentSummaryService(mockClient.Object, NullLogger<DocumentSummaryService>.Instance);
         
         // Act
         var result = await service.SummarizeAsync(
@@ -55,7 +56,7 @@ public class DocumentSummaryServiceTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateTestResult("Executive summary from AI"));
         
-        var service = new DocumentSummaryService(mockClient.Object);
+        var service = new DocumentSummaryService(mockClient.Object, NullLogger<DocumentSummaryService>.Instance);
         
         // Act
         await service.SummarizeAsync("test text", style);
@@ -78,7 +79,7 @@ public class DocumentSummaryServiceTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateTestResult("Executive summary from AI"));
 
-        var service = new DocumentSummaryService(mockClient.Object);
+        var service = new DocumentSummaryService(mockClient.Object, NullLogger<DocumentSummaryService>.Instance);
         
         // Act
         await service.SummarizeAsync(
@@ -104,7 +105,7 @@ public class DocumentSummaryServiceTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateTestResult("Executive summary from AI"));
         
-        var service = new DocumentSummaryService(mockClient.Object);
+        var service = new DocumentSummaryService(mockClient.Object, NullLogger<DocumentSummaryService>.Instance);
         const string testText = "This is a test document";
         var beforeTime = DateTimeOffset.UtcNow;
         
@@ -118,6 +119,29 @@ public class DocumentSummaryServiceTests
         Assert.Equal("gpt-4o-mini", result.Model);
         Assert.Equal(SummaryStyle.Technical, result.Style);
         Assert.InRange(result.GeneratedAt, beforeTime, afterTime);
+    }
+
+    [Fact]
+    public async Task SummarizeAsync_LogsInformation()
+    {
+        // Arrange
+        var mockClient = new Mock<IAzureOpenAiClient>();
+        mockClient
+            .Setup(x => x.GetChatCompletionAsync(It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateTestResult("Summary"));
+        
+        var logger = new TestLogger<DocumentSummaryService>();
+        var service = new DocumentSummaryService(mockClient.Object, logger);
+        
+
+        // Act
+        await service.SummarizeAsync("Test text", SummaryStyle.Executive);
+        
+        // Assert
+        var infoLog = logger.Entries.FirstOrDefault(e => e.LogLevel == LogLevel.Information);
+        Assert.NotNull(infoLog);
+        Assert.Contains("summarize", infoLog.Message, StringComparison.OrdinalIgnoreCase);
     }
     
     // Helper method

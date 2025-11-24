@@ -2,6 +2,7 @@ using Ammons.DataLabs.DocsService.Endpoints;
 using Ammons.DataLabs.DocsService.Services;
 using Ammons.DataLabs.DocsService.Configuration;
 using System.Text.Json.Serialization;
+using Ammons.DataLabs.DocsService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddScoped<IAzureOpenAiClient, AzureOpenAiClient>();
 builder.Services.AddScoped<IDocumentSummaryService, DocumentSummaryService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<DocumentSummaryExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
