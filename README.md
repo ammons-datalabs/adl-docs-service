@@ -1,4 +1,4 @@
-Op# ADL Document Summarization Service
+# ADL Document Summarization Service
 
 A production-ready document summarization API built on .NET 8 using Azure OpenAI. This service provides intelligent document summarization with multiple style options (Executive, Risks, Actions, Technical) and comprehensive error handling.
 
@@ -129,6 +129,9 @@ Content-Type: application/json
 ```json
 {
   "summary": "Generated summary text...",
+  "originalLength": 245,
+  "model": "gpt-4",
+  "generatedAt": "2024-11-25T18:30:00Z",
   "style": "Executive"
 }
 ```
