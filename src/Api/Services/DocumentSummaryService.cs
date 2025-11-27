@@ -11,19 +11,29 @@ public sealed class DocumentSummaryService(IAzureOpenAiClient openAiClient, ILog
         string? title = null,
         CancellationToken cancellationToken = default)
     {
-        var prompt = BuildPrompt(text, style, title);
-        var result = await openAiClient.GetChatCompletionAsync(prompt, cancellationToken);
-        logger.Log(LogLevel.Information, 
-            "Summarized document with {Style}, original length {OriginalLength}, summary length {SummaryLength}",
-            style, text.Length, result.Summary.Length);
+        try
+        {
+            var prompt = BuildPrompt(text, style, title);
+            var result = await openAiClient.GetChatCompletionAsync(prompt, cancellationToken);
+            logger.Log(LogLevel.Information, 
+                "Summarized document with {Style}, original length {OriginalLength}, summary length {SummaryLength}",
+                style, text.Length, result.Summary.Length);
 
-        return new SummarizeResponse(
-            Summary: result.Summary,
-            OriginalLength: text.Length,
-            Model: result.Model,
-            GeneratedAt: DateTimeOffset.UtcNow,
-            Style: style
-        );
+            return new SummarizeResponse(
+                Summary: result.Summary,
+                OriginalLength: text.Length,
+                Model: result.Model,
+                GeneratedAt: DateTimeOffset.UtcNow,
+                Style: style
+            );
+        }
+        catch (UpstreamServiceException ex)
+        {
+            logger.LogError(ex, "Upstream service failure during summarization. Please try again later.");
+            throw new DocumentSummaryException("The AI service is temporarily unavailable. Please try again later.",
+                statusCode:503,
+                innerException: ex);
+        }
     }
 
     private static string BuildPrompt(string text, SummaryStyle style, string? title)

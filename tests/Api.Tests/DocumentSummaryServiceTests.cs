@@ -144,6 +144,27 @@ public class DocumentSummaryServiceTests
         Assert.Contains("summarize", infoLog.Message, StringComparison.OrdinalIgnoreCase);
     }
     
+    [Fact]
+    public async Task SummarizeAsync_UpstreamFailure_ThrowsDocumentSummaryException()
+    {
+        // Arrange
+        var mockClient = new Mock<IAzureOpenAiClient>();
+        mockClient
+            .Setup(c => c.GetChatCompletionAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UpstreamServiceException("Upstream failed"));
+
+        var logger = new Mock<ILogger<DocumentSummaryService>>();
+        var service = new DocumentSummaryService(mockClient.Object, logger.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<DocumentSummaryException>(
+            () => service.SummarizeAsync("test text", SummaryStyle.Risks));
+
+        Assert.Equal(503, exception.StatusCode);
+        Assert.Contains("temporarily unavailable", exception.Message);
+        Assert.IsType<UpstreamServiceException>(exception.InnerException);
+    }
+    
     // Helper method
     private static ChatCompletionResult CreateTestResult(string summary = "Test summary") =>
         new ChatCompletionResult(

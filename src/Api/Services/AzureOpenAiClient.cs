@@ -13,17 +13,15 @@ public sealed class AzureOpenAiClient: IAzureOpenAiClient
     private readonly string _deploymentName;
     private readonly ILogger<AzureOpenAiClient> _logger;
 
-    public AzureOpenAiClient(IOptions<AzureOpenAiOptions> options, ILogger<AzureOpenAiClient> logger)
+    public AzureOpenAiClient(
+        IOptions<AzureOpenAiOptions> options,
+        IChatClientFactory chatClientFactory,
+        ILogger<AzureOpenAiClient> logger)
     {
-        _logger = logger;
         var config = options.Value;
+        _logger = logger;
         _deploymentName = config.DeploymentName;
-        
-        var azureClient = new AzureOpenAIClient(
-            new Uri(config.Endpoint),
-            new ApiKeyCredential(config.ApiKey));
-        
-        _chatClient = azureClient.GetChatClient(_deploymentName);
+        _chatClient = chatClientFactory.Create(_deploymentName);
     }
     public async Task<ChatCompletionResult> GetChatCompletionAsync(string prompt, CancellationToken cancellationToken = default)
     {
@@ -55,12 +53,12 @@ public sealed class AzureOpenAiClient: IAzureOpenAiClient
                 _deploymentName,
                 ex.Status,
                 ex.ErrorCode);
-            throw new DocumentSummaryException("Failed to generate summary due to Azure OpenAI error on request.", ex);
+            throw new UpstreamServiceException("Failed to generate summary due to Azure OpenAI error on request.", ex);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Azure OpenAI error on request for {DeploymentName}.", _deploymentName);
-            throw new DocumentSummaryException("Failed to generate summary due to unexpected error.", ex);
+            throw new UpstreamServiceException("Failed to generate summary due to unexpected error.", ex);
         }
         
     }

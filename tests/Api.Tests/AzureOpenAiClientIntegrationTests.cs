@@ -48,7 +48,8 @@ public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
         }
         
         var options = Options.Create(configValues);
-        var client = new AzureOpenAiClient(options, NullLogger<AzureOpenAiClient>.Instance);
+        var chatClient = new ChatClientFactory(options);
+        var client = new AzureOpenAiClient(options, chatClient, NullLogger<AzureOpenAiClient>.Instance);
         
         // Act
         var result = await client.GetChatCompletionAsync("Say hello");

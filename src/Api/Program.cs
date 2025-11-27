@@ -2,12 +2,14 @@ using Ammons.DataLabs.DocsService.Endpoints;
 using Ammons.DataLabs.DocsService.Services;
 using Ammons.DataLabs.DocsService.Configuration;
 using System.Text.Json.Serialization;
-using Ammons.DataLabs.DocsService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add ProblemDetails support (RFC 7807)
+builder.Services.AddProblemDetailsWithTracing(builder.Environment);
 
 // Configure JSON to accept string enum values
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -25,10 +27,13 @@ builder.Services
 // Register services
 builder.Services.AddScoped<IAzureOpenAiClient, AzureOpenAiClient>();
 builder.Services.AddScoped<IDocumentSummaryService, DocumentSummaryService>();
+builder.Services.AddSingleton<IChatClientFactory, ChatClientFactory>();
 
 var app = builder.Build();
 
-app.UseMiddleware<DocumentSummaryExceptionMiddleware>();
+app.UseProblemDetailsExceptionHandler(app.Environment);
+
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {
