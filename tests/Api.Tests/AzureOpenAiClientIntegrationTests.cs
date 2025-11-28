@@ -44,6 +44,7 @@ public class AzureOpenAiClientIntegrationTests(ITestOutputHelper output)
             configValues.Endpoint == $"your-endpoint")
         {
             // Skip is credentials aren't configured
+            Assert.Fail("Azure OpenAI credentials not configured");
             return;
         }
         

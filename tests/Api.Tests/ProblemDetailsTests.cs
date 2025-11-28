@@ -3,13 +3,11 @@ using System.Net.Http.Json;
 using Ammons.DataLabs.DocsService.Models;
 using Ammons.DataLabs.DocsService.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Tests;
 
-public class ProblemDetailsTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class ProblemDetailsTests(CustomWebApplicationFactory factory) : IClassFixture<CustomWebApplicationFactory>
 {
     [Fact]
     public async Task UpstreamServiceFailure_Returns503_WithProblemDetails()

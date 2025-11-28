@@ -18,7 +18,7 @@ The service follows clean architecture principles with clear separation of conce
 ```
 Program.cs
     |
-    +-- Middleware (DocumentSummaryExceptionMiddleware)
+    +-- ProblemDetailsExtensions (Exception handling)
     |
     +-- Endpoint (SummarizeEndpoints)
           |
@@ -34,7 +34,7 @@ Program.cs
 - `SummarizeEndpoints`: Minimal API endpoint mapping
 - `DocumentSummaryService`: Business logic for document summarization
 - `AzureOpenAiClient`: Integration with Azure OpenAI service
-- `DocumentSummaryExceptionMiddleware`: Global exception handling and logging
+- `ProblemDetailsExtensions`: RFC 7807 ProblemDetails exception handling
 
 ## Getting Started
 
@@ -232,15 +232,13 @@ Configuration sources (in priority order):
 ```
 adl-docs-service/
 ├── src/Api/
-│   ├── Configuration/        # Configuration models (AzureOpenAiOptions)
+│   ├── Configuration/        # Configuration and extension methods
 │   ├── Endpoints/            # Minimal API endpoints (SummarizeEndpoints)
-│   ├── Middleware/           # Global exception handling
 │   ├── Models/               # Request/response DTOs
 │   ├── Services/             # Business logic and Azure OpenAI integration
 │   ├── Program.cs            # Application entry point
 │   └── appsettings.json      # Application configuration
-├── tests/Api.Tests/          # Integration and unit tests
-└── iac/                      # Infrastructure as Code (Bicep templates)
+└── tests/Api.Tests/          # Integration and unit tests
 ```
 
 ## Testing
@@ -279,7 +277,31 @@ The project includes:
 
 ## Deployment
 
-Infrastructure as Code templates are available in the `/iac` folder for deploying to Azure.
+This service is designed to be deployed as a container or to Azure App Service.
+
+For a full example of production-ready Bicep infrastructure (App Service, APIM, Service Bus, monitoring, etc.), see:
+
+- `adl-m365-automation-starter` - Azure + M365 integration, Logic Apps, Service Bus, APIM, Bicep.
+- `HoldThatThread` - .NET 8 reasoning chat service with Bicep infra and APIM configuration.
+
+A simple Docker-based deployment example is provided below.
+
+## Run with Docker
+
+You can run the API in a local Docker container:
+
+```bash
+docker build -t adl-docs-service .
+
+docker run -p 8080:8080 \
+  -e AzureOpenAi__Endpoint="https://your-endpoint.openai.azure.com" \
+  -e AzureOpenAi__ApiKey="your-api-key" \
+  -e AzureOpenAi__DeploymentName="your-deployment-name" \
+  adl-docs-service
+```
+
+The API will be available at `http://localhost:8080`.
+See the **Configuration** section above for details on required settings.
 
 ## License
 
